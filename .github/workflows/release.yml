@@ -4,9 +4,18 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Release tag to build and publish
+        required: true
+        type: string
 
 permissions:
   contents: write
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
 
 jobs:
   lint:
@@ -77,13 +86,14 @@ jobs:
           mkdir release-package
           cp charts release-package/charts
           cp src/fonts/LICENSE release-package/FONT-LICENSE.txt
-          tar -C release-package -czf "../charts-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" .
+          tar -czf "charts-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz" -C release-package .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: charts-${{ matrix.target }}
-          path: charts-${{ github.ref_name }}-${{ matrix.target }}.tar.gz
+          path: charts-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz
+          if-no-files-found: error
 
   release:
     name: Publish GitHub Release
@@ -101,9 +111,11 @@ jobs:
       - name: Create GitHub Release with binaries
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           files: |
             dist/*/charts-*.tar.gz
           generate_release_notes: true
+          fail_on_unmatched_files: true
 
   publish-npm:
     name: Publish to npm
