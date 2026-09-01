@@ -35,18 +35,72 @@ jobs:
           echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
             | bun run src/main.ts render > /dev/null
 
-  release:
+  build-binaries:
+    name: Build ${{ matrix.target }}
     needs: [lint, smoke]
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            runner: ubuntu-latest
+          - target: darwin-arm64
+            runner: macos-latest
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create GitHub Release
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build compiled binary
+        run: bun build --compile --minify --outfile=charts src/main.ts
+
+      - name: Smoke test binary (SVG + PNG)
+        run: |
+          set -euo pipefail
+          echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
+            | ./charts render -o /tmp/test.svg
+          test -s /tmp/test.svg
+          echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
+            | ./charts render -o /tmp/test.png
+          file /tmp/test.png | grep -q PNG
+
+      - name: Package artifact
+        run: |
+          tar -czf "charts-${{ github.ref_name }}-${{ matrix.target }}.tar.gz" charts
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: charts-${{ matrix.target }}
+          path: charts-${{ github.ref_name }}-${{ matrix.target }}.tar.gz
+
+  release:
+    name: Publish GitHub Release
+    needs: [build-binaries]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release with binaries
         uses: softprops/action-gh-release@v2
         with:
+          files: |
+            dist/*/charts-*.tar.gz
           generate_release_notes: true
 
   publish-npm:
+    name: Publish to npm
     needs: [lint, smoke]
     runs-on: ubuntu-latest
     steps:
