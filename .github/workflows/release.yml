@@ -109,6 +109,8 @@ jobs:
     name: Publish to npm
     needs: [lint, smoke]
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -122,6 +124,9 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Publish to npm
+        if: env.NODE_AUTH_TOKEN != ''
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Skip npm publish without token
+        if: env.NODE_AUTH_TOKEN == ''
+        run: echo "NPM_TOKEN is not configured; skipping npm publish."
