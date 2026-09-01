@@ -119,6 +119,7 @@ jobs:
 
   publish-npm:
     name: Publish to npm
+    if: github.repository == 'Michaelliv/charts-cli'
     needs: [lint, smoke]
     runs-on: ubuntu-latest
     env:
