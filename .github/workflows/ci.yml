@@ -48,8 +48,11 @@ jobs:
             | bun run src/main.ts render -o /tmp/test.svg
           test -s /tmp/test.svg
 
+      - name: Test bundled font without system fonts
+        run: bun run test
+
       - name: Smoke test - render PNG
         run: |
-          echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
+          echo '{"title":{"text":"内置字体"},"xAxis":{"type":"category","data":["甲","乙"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
             | bun run src/main.ts render -o /tmp/test.png
           file /tmp/test.png | grep PNG
