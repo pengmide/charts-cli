@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Resvg } from "@resvg/resvg-js";
-import { getBundledFontOptions } from "./fonts/index.js";
 import { renderToSVG } from "./render.js";
 import {
 	COMPONENT_TYPES,
@@ -74,9 +73,7 @@ export function createCharts(): Charts {
 				height: opts.height,
 				theme,
 			});
-			const resvg = new Resvg(svg, {
-				font: await getBundledFontOptions(),
-			});
+			const resvg = new Resvg(svg);
 			const pngData = resvg.render();
 			return Buffer.from(pngData.asPng());
 		},

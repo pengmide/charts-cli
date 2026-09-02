@@ -66,27 +66,21 @@ jobs:
         run: bun install
 
       - name: Build compiled binary
-        run: bun build --compile --minify --outfile=charts src/binary.ts
+        run: bun build --compile --minify --outfile=charts src/main.ts
 
       - name: Smoke test binary (SVG + PNG)
         run: |
           set -euo pipefail
-          FONT_CACHE_ROOT="$(node -p 'require("node:os").tmpdir()')"
-          rm -rf "$FONT_CACHE_ROOT"/charts-cli-fonts*
           echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
             | ./charts render -o /tmp/test.svg
           test -s /tmp/test.svg
-          echo '{"title":{"text":"内置字体"},"xAxis":{"type":"category","data":["甲","乙"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
+          echo '{"xAxis":{"type":"category","data":["A","B"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[10,20]}]}' \
             | ./charts render -o /tmp/test.png
           file /tmp/test.png | grep -q PNG
-          find "$FONT_CACHE_ROOT"/charts-cli-fonts* -type f -name '*.otf' 2>/dev/null | grep -q .
 
       - name: Package artifact
         run: |
-          mkdir release-package
-          cp charts release-package/charts
-          cp src/fonts/LICENSE release-package/FONT-LICENSE.txt
-          tar -czf "charts-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz" -C release-package .
+          tar -czf "charts-${{ env.RELEASE_TAG }}-${{ matrix.target }}.tar.gz" charts
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
