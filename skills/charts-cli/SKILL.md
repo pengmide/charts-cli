@@ -1,17 +1,14 @@
 ---
 name: charts
 description: Generate SVG/PNG charts (bar, line, pie, scatter, radar, heatmap, funnel, gauge, sankey, etc.) from ECharts JSON configs
+metadata:
+  requires:
+    bins: [charts]
 ---
 
 # Charts CLI
 
 Generate charts from the command line using ECharts. No browser needed.
-
-## Setup (one-time in container)
-
-```bash
-npm install -g charts-cli
-```
 
 ## Usage
 
@@ -211,3 +208,16 @@ Shows how the global defaults, axis styling, and bar series rules compose into a
 2. Build the ECharts JSON option, applying the visual style rules above
 3. Pipe it to `charts render -o /workspace/scratch/chart.png`
 4. Use the `attach` tool to send the image to Slack
+
+## Delivering Charts
+
+1. Save the chart inside the workspace, for example `artifacts/sales-chart.png`.
+2. Confirm that the file was generated successfully.
+3. For each PNG/JPG file that needs to be delivered, call `send_file_to_user`:
+
+   ```json
+   {"file_path":"artifacts/sales-chart.png"}
+   ```
+
+4. In the final response, state which files were sent.
+
