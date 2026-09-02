@@ -15,8 +15,7 @@
   ],
   "scripts": {
     "dev": "node --import tsx src/main.ts",
-    "build": "tsc && mkdir -p dist/schemas/generated dist/themes dist/fonts && cp src/schemas/generated/*.json dist/schemas/generated/ && cp src/themes/*.json dist/themes/ && cp src/fonts/NotoSansCJKsc-Regular.otf src/fonts/LICENSE src/fonts/README.md dist/fonts/",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "build": "tsc && mkdir -p dist/schemas/generated && cp src/schemas/generated/*.json dist/schemas/generated/ && cp src/themes/*.json dist/themes/",
     "prepublishOnly": "npm run build",
     "generate:schema": "bun run src/schemas/generate.ts",
     "lint": "biome check src/",

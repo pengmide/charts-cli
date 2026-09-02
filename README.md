@@ -43,8 +43,6 @@ You install it. Your agent does the rest.
 npm install -g charts-cli
 ```
 
-PNG rendering includes Noto Sans CJK SC, so minimal Docker images do not need to install system fonts for Chinese, English, or numeric chart labels.
-
 ### Setup
 
 ```bash
@@ -131,10 +129,6 @@ Because that's a whole runtime, dependencies, and 50 lines of code for a bar cha
 
 ECharts is forgiving. Missing fields get defaults. The agent gets the chart (maybe not perfect) and can iterate.
 
-**Q: Does Docker need system fonts?**
-
-No for the default chart text. PNG rendering bundles Noto Sans CJK SC and uses it as the default font. System fonts are still loaded when available so explicitly requested font families and additional writing systems can continue to work.
-
 ---
 
 ## Development
@@ -142,15 +136,10 @@ No for the default chart text. PNG rendering bundles Noto Sans CJK SC and uses i
 ```bash
 bun install
 bun run src/main.ts --help
-bun run test
 
 # Regenerate schemas from ECharts types
 bun run generate:schema
 ```
-
-## Third-party fonts
-
-PNG rendering includes the unmodified Noto Sans CJK SC 2.004 font from the [Noto CJK project](https://github.com/notofonts/noto-cjk/tree/Sans2.004). The font is distributed under the SIL Open Font License 1.1; the license and source details are included in `src/fonts/` and the published package.
 
 ---
 
